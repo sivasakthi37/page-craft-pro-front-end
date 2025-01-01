@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import SidebarLinkGroup from './SidebarLinkGroup';
 import Logo from '../../images/logo/logo.svg';
 import { useAuth } from '../../AuthContext';
 
@@ -155,7 +154,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item My Pages --> */}
               <li>
                 <NavLink
-                  to="/pages"
+                  to={`/pages/${user?.id}`}
                   className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                     pathname.includes('pages') && 'bg-graydark dark:bg-meta-4'
                   }`}
@@ -188,7 +187,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Page Builder --> */}
               <li>
                 <NavLink
-                  to="/page-builder/new"
+                  to={`/page-builder/${user?.id}/new`}
                   className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                     pathname.includes('page-builder') && 'bg-graydark dark:bg-meta-4'
                   }`}

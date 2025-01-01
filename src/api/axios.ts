@@ -28,7 +28,18 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-        console.error("API Error:", error);
+        if (error.response && error.response.status === 401) {
+            // Clear authentication tokens
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            
+            // Redirect to signin page
+            // Note: This is a global redirect and might need to be adjusted 
+            // based on your routing strategy
+            window.location.href = '/signin';
+        } else {
+            console.error("API Error:", error);
+        }
         return Promise.reject(error);
     }
 );

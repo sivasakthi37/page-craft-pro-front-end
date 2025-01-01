@@ -26,6 +26,18 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
     console.log('FileInputRef current:', fileInputRef.current);
   }, []);
 
+  useEffect(() => {
+    // Ensure fileInputRef is created if not already present
+    if (!fileInputRef.current) {
+      const inputElement = document.createElement('input');
+      inputElement.type = 'file';
+      inputElement.accept = 'image/*';
+      inputElement.style.display = 'none';
+      document.body.appendChild(inputElement);
+      fileInputRef.current = inputElement;
+    }
+  }, []);
+
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -96,11 +108,25 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
   const triggerFileInput = (event: React.MouseEvent) => {
     event.stopPropagation();
     event.preventDefault();
-    console.log('Triggering file input', fileInputRef.current);
-    if (fileInputRef.current) {
+    console.log('Triggering file input', fileInputRef);
+    
+    // Ensure fileInputRef is properly initialized
+    if (fileInputRef && fileInputRef.current) {
       fileInputRef.current.click();
     } else {
-      console.error('File input ref is null');
+      console.error('File input ref is null or undefined', {
+        fileInputRef,
+        current: fileInputRef?.current
+      });
+      
+      // Fallback method to create and trigger file input
+      const fallbackInput = document.createElement('input');
+      fallbackInput.type = 'file';
+      fallbackInput.accept = 'image/*';
+      fallbackInput.onchange = (e) => {
+        handleFileSelect(e as any);
+      };
+      fallbackInput.click();
     }
   };
 
@@ -167,10 +193,22 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
       ) : (
         <div
           className="border-2 border-dashed border-stroke dark:border-strokedark rounded-lg p-8 text-center cursor-pointer hover:bg-gray-1 dark:hover:bg-meta-4 transition-colors"
-          onClick={(e) => handleClick(e)}
+          onClick={(e) => {
+            console.log('Div clicked');
+            triggerFileInput(e);
+            handleClick(e);
+          }}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
         >
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept="image/*"
+            className="hidden"
+            onClick={(e) => e.stopPropagation()}
+          />
           <div className="mb-4">
             <svg
               className="w-12 h-12 mx-auto text-gray-400"
@@ -202,15 +240,6 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
       )}
 
       {error && <p className="text-danger mt-2 text-sm">{error}</p>}
-
-      <input
-      id={id}
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileSelect}
-        accept="image/*"
-        className="hidden"
-      />
     </div>
   );
 };

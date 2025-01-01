@@ -19,6 +19,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import { useAuth } from '../../AuthContext';
+import { getUserDetails } from '../../api/admin';
 import TextBlock from './components/TextBlock';
 import ImageBlock from './components/ImageBlock';
 import BlockToolbar from './components/BlockToolbar';
@@ -26,6 +27,7 @@ import { getPages, updatePage, createPage } from '../../api/pages';
 import { checkPageLimit } from '../../api/subscription';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import toast from 'react-hot-toast';
+import Button from '../../components/Button';
 
 interface Block {
   id: string;
@@ -38,6 +40,11 @@ interface Page {
   id: string;
   title: string;
   blocks: Block[];
+}
+
+interface Error {
+  message: string;
+  type: string;
 }
 
 const SortableBlock = ({ block, onDelete, onChange }: { 
@@ -102,13 +109,73 @@ const SortableBlock = ({ block, onDelete, onChange }: {
 };
 
 const PageBuilder: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { userId, id } = useParams<{ userId: string; id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [page, setPage] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [saving, setSaving] = useState(false);
+  const [userDetails, setUserDetails] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchPageAndUserDetails = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Check page limit for the user
+        if (userId) {
+          const pageLimitResponse = await checkPageLimit(userId );
+          console.log("pageLimitResponse",pageLimitResponse);
+          
+          if (!pageLimitResponse.canCreate) {
+            // Save detailed error message in state
+            setError({
+              message: pageLimitResponse.message || 'Page limit reached. You cannot create more pages.',
+              type: 'page-limit'
+            });
+            return;
+          }
+        }
+
+        if (id !=='new') {
+          const pages = await getPages(userId);
+          const currentPage = pages.find((p: Page) => p.id === id);
+          if (!currentPage) {
+            setError({
+              message: 'Page not found',
+              type: 'page-not-found'
+            });
+            return;
+          }
+          setPage(currentPage);
+        } else {
+          setPage({
+            id: 'new',
+            title: 'Untitled Page',
+            blocks: [],
+          });
+        }
+
+        // Fetch user details if current user is admin
+        if (user?.role === 'admin' && userId) {
+          const details = await getUserDetails(userId);
+          setUserDetails(details.user);
+        }
+      } catch (err) {
+        setError({
+          message: 'Failed to fetch page or user details',
+          type: 'fetch-error'
+        });
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPageAndUserDetails();
+  }, [id, userId, user?.role]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -120,47 +187,6 @@ const PageBuilder: React.FC = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-
-  useEffect(() => {
-    const loadPage = async () => {
-      try {
-        if (id === 'new') {
-          console.log("user",user);
-          // Check page limit for free users
-          if (user && user.subscriptionStatus !== 'paid') {
-            const { canCreate } = await checkPageLimit(user?.id || '');
-            if (!canCreate) {
-              setError(
-                'Oops! You\'ve reached your page creation limit. 🚀 Upgrade your plan to unlock unlimited page creation and supercharge your productivity!'
-              );
-              return;
-            }
-          }
-
-          setPage({
-            id: 'new',
-            title: 'Untitled Page',
-            blocks: [],
-          });
-        } else {
-          const pages = await getPages( user?.id || '');
-          const currentPage = pages.find((p: Page) => p.id === id);
-          if (!currentPage) {
-            setError('Page not found');
-            return;
-          }
-          setPage(currentPage);
-        }
-      } catch (err) {
-        setError('Failed to load page');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPage();
-  }, [id, user]);
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (page) {
@@ -231,25 +257,36 @@ const PageBuilder: React.FC = () => {
     if (!page) return;
 
     try {
-        console.log("page",page);
-        
       setSaving(true);
       if (page.id === 'new') {
-        const newPage = await createPage({userId: user?.id || '', ...page});
-        navigate(`/page-builder/${newPage.id}`);
+        const newPage = await createPage({userId: userId || '', ...page});
+        navigate(`/page-builder/${userId}/${newPage.id}`);
         toast.success('page created successfully!');
       } else {
-        await updatePage(page.id, {userId: user?.id || '', ...page});
-        console.log("updated");
-        
+        await updatePage(page.id, {userId:userId || '', ...page});
         toast.success('page updated successfully!');
       }
     } catch (err) {
-      setError('Failed to save page');
+      setError({
+        message: 'Failed to save page',
+        type: 'save-error'
+      });
       console.error(err);
     } finally {
       setSaving(false);
     }
+  };
+
+  const renderUserDetails = () => {
+    if (!user || user.role !== 'admin' || !userDetails) return null;
+
+    return (
+      <div className="mb-4">
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Editing page for: <span className="font-semibold text-gray-800 dark:text-white">{userDetails.username}</span>
+        </p>
+      </div>
+    );
   };
 
   if (loading) {
@@ -264,34 +301,57 @@ const PageBuilder: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <p className="text-danger mb-4">{error}</p>
-          <button
-            onClick={() => navigate('/pages')}
-            className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90"
-          >
-            Back to Pages
-          </button>
+          <p className="text-danger mb-4">{error.message}</p>
+          {error.type === 'page-limit' && (
+            <div style={{ marginTop: '10px' }}>
+              <Button onClick={() => navigate('/subscription')}>
+                Upgrade Plan
+              </Button>
+              <Button onClick={() => navigate(`/pages/${userId}`)} style={{ marginLeft: '10px' }}>
+                View Pages
+              </Button>
+            </div>
+          )}
+          {error.type !== 'page-limit' && (
+            <button
+              onClick={() => navigate('/pages')}
+              className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90"
+            >
+              Back to Pages
+            </button>
+          )}
         </div>
       </div>
     );
   }
-// console.log("page",page);
 
   return (
     <>
       <Breadcrumb pageName="Page Builder" />
 
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          {renderUserDetails()}
+        </div>
+      </div>
+
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
+        <label 
+          htmlFor="pageTitle" 
+          className="mb-2 block text-base font-bold text-gray-800 dark:text-white"
+        >
+          Page Title
+        </label>
           <div className="flex flex-wrap items-center justify-between gap-4.5">
             <div className="flex flex-1">
-              <input
-                type="text"
-                value={page?.title || ''}
-                onChange={handleTitleChange}
+            <input
+              type="text"
+              value={page?.title || ''}
+              onChange={handleTitleChange}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 placeholder="Page Title"
-              />
+            />
             </div>
 
             <div className="flex gap-4.5">

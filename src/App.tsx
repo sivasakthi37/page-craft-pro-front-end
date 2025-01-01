@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import { Toaster } from 'react-hot-toast';
 
@@ -46,19 +46,19 @@ const App: React.FC = () => {
           <Route
             path="/signin"
             element={
-              <>
+              <ProtectedRoute authPage={true}>
                 <PageTitle title="Signin | TailAdmin - Tailwind CSS Admin Dashboard Template" />
                 <SignIn />
-              </>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/signup"
             element={
-              <>
+              <ProtectedRoute authPage={true}>
                 <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
                 <SignUp />
-              </>
+              </ProtectedRoute>
             }
           />
 
@@ -79,12 +79,12 @@ const App: React.FC = () => {
                       }
                     /> */}
                     <Route
-                      path="/pages"
+                      path="/pages/:userId"
                       element={
-                        <>
-                          <PageTitle title="Pages" />
-                          <Pages />
-                        </>
+                          <>
+                            <PageTitle title="Pages" />
+                            <Pages />
+                          </>
                       }
                     />
                     <Route
@@ -96,15 +96,7 @@ const App: React.FC = () => {
                         </>
                       }
                     />
-                    <Route
-                      path="/calendar"
-                      element={
-                        <>
-                          <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                          <Calendar />
-                        </>
-                      }
-                    />
+                   
                     <Route
                       path="/profile"
                       element={
@@ -114,71 +106,10 @@ const App: React.FC = () => {
                         </>
                       }
                     />
+                   
+                   
                     <Route
-                      path="/forms/form-elements"
-                      element={
-                        <>
-                          <PageTitle title="Form Elements | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                          <FormElements />
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/forms/form-layout"
-                      element={
-                        <>
-                          <PageTitle title="Form Layout | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                          <FormLayout />
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/tables"
-                      element={
-                        <>
-                          <PageTitle title="Tables | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                          <Tables />
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/settings"
-                      element={
-                        <>
-                          <PageTitle title="Settings | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                          <Settings />
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/chart"
-                      element={
-                        <>
-                          <PageTitle title="Basic Chart | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                          <Chart />
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/ui/alerts"
-                      element={
-                        <>
-                          <PageTitle title="Alerts | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                          <Alerts />
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/ui/buttons"
-                      element={
-                        <>
-                          <PageTitle title="Buttons | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                          <Buttons />
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/page-builder/:id"
+                      path="/page-builder/:userId/:id"
                       element={
                         <ProtectedRoute>
                           <PageTitle title="Page Builder | PageCraft Pro" />

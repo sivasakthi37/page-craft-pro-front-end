@@ -80,7 +80,7 @@ const SignIn: React.FC = () => {
         // Store user data in auth context
         login(response.data);
         // Redirect to root which renders ECommerce component
-        navigate('/pages');
+        navigate(`/pages/${response.data.user.id}`);
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
@@ -111,12 +111,6 @@ const SignIn: React.FC = () => {
               <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
                 Sign In
               </h2>
-
-              {error && (
-                <div className="mb-4 text-red-500">
-                  {error}
-                </div>
-              )}
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
@@ -163,13 +157,32 @@ const SignIn: React.FC = () => {
                   )}
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90 disabled:opacity-50"
-                >
-                  {loading ? 'Signing in...' : 'Sign In'}
-                </button>
+                <div className="mb-5">
+                  <input
+                    type="submit"
+                    value={loading ? 'Signing In...' : 'Sign In'}
+                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
+                    disabled={loading}
+                  />
+                </div>
+
+                {error && (
+                  <div className="mt-4 text-center text-red-500">
+                    {error}
+                  </div>
+                )}
+
+                <div className="mt-6 text-center">
+                  <p className="text-body-secondary">
+                    Don't have an account?{' '}
+                    <Link 
+                      to="/signup" 
+                      className="text-primary hover:underline"
+                    >
+                      Sign Up
+                    </Link>
+                  </p>
+                </div>
               </form>
             </div>
           </div>

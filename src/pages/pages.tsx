@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getPages, deletePage, Page } from '../api/pages';
+import { getUserDetails } from '../api/admin';
 import { useAuth } from '../AuthContext';
 import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 
@@ -8,15 +9,24 @@ const Pages: React.FC = () => {
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userDetails, setUserDetails] = useState<any>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const routes = useParams();
+  const userId = routes.userId || user?.id;
 
   useEffect(() => {
     const fetchPages = async () => {
       try {
-        if (user?.id) {
-          const fetchedPages = await getPages(user.id);
+        if (userId) {
+          const fetchedPages = await getPages(userId);
           setPages(fetchedPages);
+
+          // Only fetch user details if current user is admin
+          if (user?.role === 'admin') {
+            const details = await getUserDetails(userId);
+            setUserDetails(details.user);
+          }
         }
       } catch (err) {
         setError('Failed to fetch pages');
@@ -27,7 +37,7 @@ const Pages: React.FC = () => {
     };
 
     fetchPages();
-  }, [user?.id]);
+  }, [userId, user?.role]);
 
   const handleDeletePage = async (pageId: string) => {
     try {
@@ -42,20 +52,36 @@ const Pages: React.FC = () => {
   };
 
   const handleEditPage = (pageId: string) => {
-    navigate(`/page-builder/${pageId}`);
+    navigate(`/page-builder/${userId}/${pageId}`);
+  };
+
+  // Render user details if admin and user details exist
+  const renderUserDetails = () => {
+    if (!user || user.role !== 'admin' || !userDetails) return null;
+
+    return (
+      <div className="mb-4">
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Viewing pages for: <span className="font-semibold text-gray-800 dark:text-white">{userDetails.username}</span>
+        </p>
+      </div>
+    );
   };
 
   return (
     <>
-      <Breadcrumb pageName="Pages" />
+      {/* <Breadcrumb pageName="Pages" /> */}
 
       <div className="container mx-auto px-4 py-8">
+        {renderUserDetails()}
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-            My Pages
+            {user?.role === 'admin' && userDetails 
+              ? `${userDetails.username}'s Pages` 
+              : 'My Pages'}
           </h2>
           <Link
-            to="/page-builder/new"
+            to={`/page-builder/${userId}/new`}
             className="flex items-center space-x-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors duration-300 ease-in-out"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
