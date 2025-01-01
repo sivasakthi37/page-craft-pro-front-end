@@ -14,10 +14,12 @@ const Pages: React.FC = () => {
   const [userDetails, setUserDetails] = useState<any>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newPageName, setNewPageName] = useState('');
+  const [filteredPages, setFilteredPages] = useState<Page[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
   const routes = useParams();
-  const userId = routes.userId ||'';
+  const userId = routes.userId || '';
 
   const fetchPages = async () => {
     try {
@@ -38,9 +40,17 @@ const Pages: React.FC = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchPages();
   }, [userId, user?.role]);
+
+  useEffect(() => {
+    const filtered = pages.filter(page => 
+      page.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredPages(filtered);
+  }, [searchTerm, pages]);
 
   const handleDeletePage = async (pageId: string) => {
     try {
@@ -85,9 +95,9 @@ const Pages: React.FC = () => {
       // Close modal and reset name
       setIsCreateModalOpen(false);
       setNewPageName('');
-console.log("newPage",newPage);
-fetchPages()
-toast.success('created page sucessfully');
+      console.log("newPage",newPage);
+      fetchPages()
+      toast.success('created page sucessfully');
       // Navigate to page builder
       // navigate(`/page-builder/${userId}/${newPage.id}`);
     } catch (error) {
@@ -173,15 +183,24 @@ toast.success('created page sucessfully');
               ? `${userDetails.username}'s Pages` 
               : 'My Pages'}
           </h2>
-          <button 
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center space-x-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors duration-300 ease-in-out"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
-            <span>Create New Page</span>
-          </button>
+          <div className="flex items-center space-x-4">
+            <input
+              type="text"
+              placeholder="Search pages..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="px-3 py-2 border rounded-md w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button 
+              onClick={() => setIsCreateModalOpen(true)}
+              className="flex items-center space-x-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors duration-300 ease-in-out"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+              <span>Create New Page</span>
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -192,7 +211,7 @@ toast.success('created page sucessfully');
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             {error}
           </div>
-        ) : pages.length === 0 ? (
+        ) : filteredPages.length === 0 ? (
           <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-8 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -203,7 +222,7 @@ toast.success('created page sucessfully');
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pages.map((page) => (
+            {filteredPages.map((page) => (
               <div 
                 key={page.id} 
                 className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 ease-in-out border dark:border-gray-700"
