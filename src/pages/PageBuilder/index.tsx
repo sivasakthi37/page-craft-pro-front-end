@@ -124,20 +124,7 @@ const PageBuilder: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // Check page limit for the user
-        if (userId) {
-          const pageLimitResponse = await checkPageLimit(userId );
-          console.log("pageLimitResponse",pageLimitResponse);
-          
-          if (!pageLimitResponse.canCreate) {
-            // Save detailed error message in state
-            setError({
-              message: pageLimitResponse.message || 'Page limit reached. You cannot create more pages.',
-              type: 'page-limit'
-            });
-            return;
-          }
-        }
+        
 
         if (id !=='new') {
           const pages = await getPages(userId);
@@ -151,6 +138,20 @@ const PageBuilder: React.FC = () => {
           }
           setPage(currentPage);
         } else {
+          // Check page limit for the user
+        if (userId) {
+          const pageLimitResponse = await checkPageLimit(userId );
+          console.log("pageLimitResponse",pageLimitResponse);
+          
+          if (!pageLimitResponse.canCreate) {
+            // Save detailed error message in state
+            setError({
+              message: pageLimitResponse.message || 'Page limit reached. You cannot create more pages.',
+              type: 'page-limit'
+            });
+            return;
+          }
+        }
           setPage({
             id: 'new',
             title: 'Untitled Page',
@@ -327,6 +328,28 @@ const PageBuilder: React.FC = () => {
 
   return (
     <>
+    <div className="flex items-center gap-4 mb-4">
+        <div 
+          className="flex items-center cursor-pointer hover:opacity-75"
+          onClick={() => navigate(`/pages/${userId}`)}
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="h-6 w-6 mr-2" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+            />
+          </svg>
+          <span className="text-lg font-medium">Back</span>
+        </div>
+      </div>
       <Breadcrumb pageName="Page Builder" />
 
       <div className="mb-4 flex items-center justify-between">

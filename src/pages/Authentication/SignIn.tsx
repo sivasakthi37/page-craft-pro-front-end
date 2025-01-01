@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../AuthContext'; // Import useAuth hook
-import LogoDark from '../../images/logo/logo-dark.svg';
-import Logo from '../../images/logo/logo.svg';
+import { useAuth } from '../../AuthContext';
+import Logo from '../../images/logo/logo-craft-pro-logo-black.svg';
 import axiosInstance from '../../api/axios';
 
-const SignIn: React.FC = () => {
+const SignIn: React.FC<{ isAdmin?: boolean }> = ({ isAdmin = false }) => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // Use login function from AuthContext
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -97,11 +96,11 @@ const SignIn: React.FC = () => {
             <div className="py-17.5 px-26 text-center">
               <Link className="mb-5.5 inline-block" to="/">
                 <img className="hidden dark:block" src={Logo} alt="Logo" />
-                <img className="dark:hidden" src={LogoDark} alt="Logo" />
+                <img className="dark:hidden" src={Logo} alt="Logo" />
               </Link>
 
               <p className="2xl:px-20">
-                Welcome back! Please sign in to your account.
+              {  ` Welcome back! Please sign in to your ${isAdmin ? 'admin' : 'user'} account.`}
               </p>
             </div>
           </div>
@@ -109,7 +108,7 @@ const SignIn: React.FC = () => {
           <div className="w-full xl:w-1/2">
             <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
               <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-                Sign In
+                {isAdmin ? 'Admin Sign In' : 'Sign In to PageCraft pro'}
               </h2>
 
               <form onSubmit={handleSubmit}>
@@ -171,7 +170,7 @@ const SignIn: React.FC = () => {
                     {error}
                   </div>
                 )}
-
+{!isAdmin && (
                 <div className="mt-6 text-center">
                   <p className="text-body-secondary">
                     Don't have an account?{' '}
@@ -183,6 +182,7 @@ const SignIn: React.FC = () => {
                     </Link>
                   </p>
                 </div>
+)}
               </form>
             </div>
           </div>

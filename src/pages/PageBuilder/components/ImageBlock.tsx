@@ -20,7 +20,7 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
   const [imageUrl, setImageUrl] = useState(initialUrl);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     console.log('FileInputRef current:', fileInputRef.current);
@@ -34,7 +34,7 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
       inputElement.accept = 'image/*';
       inputElement.style.display = 'none';
       document.body.appendChild(inputElement);
-      fileInputRef.current = inputElement;
+      fileInputRef.current = inputElement as HTMLInputElement;
     }
   }, []);
 

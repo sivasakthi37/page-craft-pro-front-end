@@ -16,7 +16,7 @@ const Users: React.FC = () => {
   const navigate = useNavigate();
 
   const [isPasswordResetModalOpen, setIsPasswordResetModalOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
@@ -36,7 +36,7 @@ const Users: React.FC = () => {
   }, []);
 
   // Super Admin Actions
-  const handleResetPassword = async (userId: number) => {
+  const handleResetPassword = async (userId: string) => {
     setSelectedUserId(userId);
     setIsPasswordResetModalOpen(true);
   };
@@ -54,7 +54,7 @@ const Users: React.FC = () => {
     }
   };
 
-  const handleToggleRole = async (userId: number, currentRole: 'user' | 'admin') => {
+  const handleToggleRole = async (userId: string, currentRole: 'user' | 'admin') => {
     try {
       const newRole = currentRole === 'admin' ? 'user' : 'admin';
       const updatedUser = await updateUserRole(userId, newRole);
@@ -75,7 +75,7 @@ const Users: React.FC = () => {
     }
   };
 
-  const handleBanUser = async (userId: number) => {
+  const handleBanUser = async (userId: string) => {
     try {
       // Determine the new status based on current status
       const userToUpdate = users.find(user => user.id === userId);
@@ -102,7 +102,7 @@ const Users: React.FC = () => {
     }
   };
 
-  const handleViewUserPages = (userId: number) => {
+  const handleViewUserPages = (userId: string) => {
     navigate(`/pages/${userId}`);
   };
 
@@ -191,7 +191,7 @@ console.log("user.role === 'admin' && authUser?.id && Number(authUser.id) === us
                       <button 
                         onClick={() => handleBanUser(user.id)}
                         className={`${user.status === 'active' ? 'text-green-500' : 'text-red-500'} hover:opacity-75`}
-                        title={user.status === 'active' ? 'Unban User' : 'Ban User'}
+                        title={user.status === 'active' ? 'Click to ban User' : 'Click to Ban User'}
                       >
                         {user.status === 'active' ?  <FaUnlock /> : <FaBan />}
                       </button>

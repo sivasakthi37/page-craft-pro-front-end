@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import { Toaster } from 'react-hot-toast';
 
@@ -7,18 +7,11 @@ import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
 import SignIn from './pages/Authentication/SignIn';
 import SignUp from './pages/Authentication/SignUp';
-import Calendar from './pages/Calendar';
 import Pages from './pages/pages';
 import Users from './pages/users';
-import ECommerce from './pages/Dashboard/ECommerce';
+
 import Profile from './pages/Profile';
-import FormElements from './pages/Form/FormElements';
-import FormLayout from './pages/Form/FormLayout';
-import Tables from './pages/Tables';
-import Settings from './pages/Settings';
-import Chart from './pages/Chart';
-import Alerts from './pages/UiElements/Alerts';
-import Buttons from './pages/UiElements/Buttons';
+
 import DefaultLayout from './layout/DefaultLayout';
 import ProtectedRoute from './ProtectedRoute';
 import PageBuilder from './pages/PageBuilder';
@@ -47,8 +40,17 @@ const App: React.FC = () => {
             path="/signin"
             element={
               <ProtectedRoute authPage={true}>
-                <PageTitle title="Signin | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Signin | pagecraft pro" />
                 <SignIn />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/admin"
+            element={
+              <ProtectedRoute authPage={true}>
+                <PageTitle title="admin signIn | pagecraft pro" />
+                <SignIn isAdmin={true} />
               </ProtectedRoute>
             }
           />
@@ -56,7 +58,7 @@ const App: React.FC = () => {
             path="/signup"
             element={
               <ProtectedRoute authPage={true}>
-                <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Signup | pagecraft pro" />
                 <SignUp />
               </ProtectedRoute>
             }
@@ -69,15 +71,6 @@ const App: React.FC = () => {
               <ProtectedRoute>
                 <DefaultLayout>
                   <Routes>
-                    {/* <Route
-                      index
-                      element={
-                        <>
-                          <PageTitle title="eCommerce Dashboard | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                          <ECommerce />
-                        </>
-                      }
-                    /> */}
                     <Route
                       path="/pages/:userId"
                       element={
@@ -101,7 +94,7 @@ const App: React.FC = () => {
                       path="/profile"
                       element={
                         <>
-                          <PageTitle title="Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                          <PageTitle title="Profile | pagecraft pro" />
                           <Profile />
                         </>
                       }

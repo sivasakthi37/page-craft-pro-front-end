@@ -1,41 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getPages, deletePage, Page } from '../api/pages';
+import { getPages, deletePage, createPage, Page } from '../api/pages';
 import { getUserDetails } from '../api/admin';
+import {  checkPageLimit } from '../api/subscription';
 import { useAuth } from '../AuthContext';
 import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
+import toast from 'react-hot-toast';
 
 const Pages: React.FC = () => {
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userDetails, setUserDetails] = useState<any>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newPageName, setNewPageName] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
   const routes = useParams();
-  const userId = routes.userId || user?.id;
+  const userId = routes.userId ||'';
 
-  useEffect(() => {
-    const fetchPages = async () => {
-      try {
-        if (userId) {
-          const fetchedPages = await getPages(userId);
-          setPages(fetchedPages);
+  const fetchPages = async () => {
+    try {
+      if (userId) {
+        const fetchedPages = await getPages(userId);
+        setPages(fetchedPages);
 
-          // Only fetch user details if current user is admin
-          if (user?.role === 'admin') {
-            const details = await getUserDetails(userId);
-            setUserDetails(details.user);
-          }
+        // Only fetch user details if current user is admin
+        if (user?.role === 'admin') {
+          const details = await getUserDetails(userId);
+          setUserDetails(details.user);
         }
-      } catch (err) {
-        setError('Failed to fetch pages');
-        console.error(err);
-      } finally {
-        setLoading(false);
       }
-    };
-
+    } catch (err) {
+      setError('Failed to fetch pages');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchPages();
   }, [userId, user?.role]);
 
@@ -55,6 +58,45 @@ const Pages: React.FC = () => {
     navigate(`/page-builder/${userId}/${pageId}`);
   };
 
+  const handleCreatePage = async () => {
+    if (!newPageName.trim()) {
+      toast.error('Please enter a page name');
+      return;
+    }
+
+    try {
+      // Check page limit
+      const pageLimitResponse = await checkPageLimit(userId || '');
+      
+      if (!pageLimitResponse.canCreate) {
+        toast.error(pageLimitResponse.message || 'Page limit reached please upgrade your plan to create more pages');
+        setIsCreateModalOpen(false);
+        return;
+      }
+
+      // Create page
+      const newPage = await createPage({
+        id: 'new',
+        title: newPageName,
+        blocks: [],
+        userId: userId || ''
+      });
+
+      // Close modal and reset name
+      setIsCreateModalOpen(false);
+      setNewPageName('');
+console.log("newPage",newPage);
+fetchPages()
+toast.success('created page sucessfully');
+      // Navigate to page builder
+      // navigate(`/page-builder/${userId}/${newPage.id}`);
+    } catch (error) {
+      console.error('Error creating page:', error);
+      toast.error('Failed to create page');
+      setIsCreateModalOpen(false);
+    }
+  };
+
   // Render user details if admin and user details exist
   const renderUserDetails = () => {
     if (!user || user.role !== 'admin' || !userDetails) return null;
@@ -65,6 +107,57 @@ const Pages: React.FC = () => {
           Viewing pages for: <span className="font-semibold text-gray-800 dark:text-white">{userDetails.username}</span>
         </p>
       </div>
+    );
+  };
+
+  // Modal component
+  const CreatePageModal = () => {
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    React.useEffect(() => {
+      if (isCreateModalOpen) {
+        inputRef.current?.focus();
+      }
+    }, [isCreateModalOpen]);
+
+    return (
+      isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+            <h2 className="text-xl font-bold mb-4">Create New Page</h2>
+            <input
+              ref={inputRef}
+              type="text"
+              value={newPageName}
+              onChange={(e) => {
+                setNewPageName(e.target.value);
+                inputRef.current?.focus(); // Ensure input stays focused
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleCreatePage();
+                }
+              }}
+              placeholder="Enter page name"
+              className="w-full p-2 border rounded mb-4"
+            />
+            <div className="flex justify-end space-x-2">
+              <button 
+                onClick={() => setIsCreateModalOpen(false)}
+                className="px-4 py-2 bg-gray-200 rounded"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleCreatePage}
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )
     );
   };
 
@@ -80,15 +173,15 @@ const Pages: React.FC = () => {
               ? `${userDetails.username}'s Pages` 
               : 'My Pages'}
           </h2>
-          <Link
-            to={`/page-builder/${userId}/new`}
+          <button 
+            onClick={() => setIsCreateModalOpen(true)}
             className="flex items-center space-x-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors duration-300 ease-in-out"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
             <span>Create New Page</span>
-          </Link>
+          </button>
         </div>
 
         {loading ? (
@@ -137,7 +230,7 @@ const Pages: React.FC = () => {
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
+                      </svg>
                       </button>
                     </div>
                   </div>
@@ -150,6 +243,9 @@ const Pages: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal Component */}
+      <CreatePageModal />
     </>
   );
 };

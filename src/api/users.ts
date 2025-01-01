@@ -2,7 +2,7 @@ import axiosInstance from './axios';
 
 // Define the User type to match the interface in users.tsx
 export interface User {
-  id: number;
+  id: string;
   username: string;
   email: string;
   role: 'user' | 'admin';
@@ -21,7 +21,7 @@ export const fetchUsers = async (): Promise<User[]> => {
   }
 };
 
-export const updateUserStatus = async (userId: number, status: 'active' | 'banned'): Promise<User> => {
+export const updateUserStatus = async (userId: string, status: 'active' | 'banned'): Promise<User> => {
   try {
     const response = await axiosInstance.put(`/users/status/${userId}`, { status });
     return response.data.user;
@@ -31,7 +31,7 @@ export const updateUserStatus = async (userId: number, status: 'active' | 'banne
   }
 };
 
-export const updateUserRole = async (userId: number, role: 'user' | 'admin'): Promise<User> => {
+export const updateUserRole = async (userId: string, role: 'user' | 'admin'): Promise<User> => {
   try {
     const response = await axiosInstance.put(`/users/role/${userId}`, { role });
     return response.data.user;
@@ -41,7 +41,7 @@ export const updateUserRole = async (userId: number, role: 'user' | 'admin'): Pr
   }
 };
 
-export const resetUserPassword = async (userId: number, newPassword: string): Promise<User> => {
+export const resetUserPassword = async (userId: string, newPassword: string): Promise<User> => {
   try {
     const response = await axiosInstance.post(`users/reset-password/${userId}`, { newPassword });
     return response.data.user;

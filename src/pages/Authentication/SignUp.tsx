@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
-import LogoDark from '../../images/logo/logo-dark.svg';
-import Logo from '../../images/logo/logo.svg';
+import Logo from '../../images/logo/logo-craft-pro-logo-black.svg';
 import axiosInstance from '../../api/axios';
 
 const SignUp: React.FC = () => {
@@ -128,15 +127,18 @@ let ApiData= {
           <div className="py-17.5 px-26 text-center">
             <Link className="mb-5.5 inline-block" to="/">
               <img className="hidden dark:block" src={Logo} alt="Logo" />
-              <img className="dark:hidden" src={LogoDark} alt="Logo" />
+              <img className="dark:hidden" src={Logo} alt="Logo" />
             </Link>
+            <p >
+                Welcome back! Please sign up to your account.
+              </p>
           </div>
         </div>
 
         <div className="w-full xl:w-1/2">
           <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
             <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-              Sign Up to TailAdmin
+              Sign Up to PageCraft pro
             </h2>
 
             <form onSubmit={handleSubmit}>

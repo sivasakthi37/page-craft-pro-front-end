@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 50" width="250" height="50">
+  <defs>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a90e2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4a90e2;stop-opacity:0.8" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Icon -->
+  <g transform="translate(5, 5) scale(0.7)">
+    <path 
+      d="M10 5 L40 5 Q45 5, 45 10 L45 40 Q45 45, 40 45 L10 45 Q5 45, 5 40 L5 10 Q5 5, 10 5" 
+      fill="url(#iconGradient)"
+      stroke="#4a90e2"
+      stroke-width="2"
+    />
+    <path 
+      d="M15 15 L35 15 M15 25 L35 25 M15 35 L25 35" 
+      stroke="#ffffff" 
+      stroke-width="3" 
+      stroke-linecap="round"
+    />
+  </g>
+  
+  <!-- Text -->
+  <text x="60" y="35" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#ffffff">
+    PageCraft
+    <tspan font-size="14" font-weight="normal" fill="#ffffff" dx="5">PRO</tspan>
+  </text>
+</svg>
