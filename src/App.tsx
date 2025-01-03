@@ -5,17 +5,11 @@ import { Toaster } from 'react-hot-toast';
 
 import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
-import SignIn from './pages/Authentication/SignIn';
-import SignUp from './pages/Authentication/SignUp';
-import Pages from './pages/pages';
-import Users from './pages/users';
-
-import Profile from './pages/Profile';
-
 import DefaultLayout from './layout/DefaultLayout';
 import ProtectedRoute from './ProtectedRoute';
-import PageBuilder from './pages/PageBuilder';
-import SubscriptionPage from './pages/Subscription';
+
+// Import route configurations
+import { PAGE_ROUTES } from './routes';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -35,95 +29,37 @@ const App: React.FC = () => {
         <Loader />
       ) : (
         <Routes>
-          {/* Authentication Routes */}
-          <Route
-            path="/signin"
-            element={
-              <ProtectedRoute authPage={true}>
-                <PageTitle title="Signin | pagecraft pro" />
-                <SignIn />
-              </ProtectedRoute>
-            }
-          />
-           <Route
-            path="/admin"
-            element={
-              <ProtectedRoute authPage={true}>
-                <PageTitle title="admin signIn | pagecraft pro" />
-                <SignIn isAdmin={true} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <ProtectedRoute authPage={true}>
-                <PageTitle title="Signup | pagecraft pro" />
-                <SignUp />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Protected Routes */}
-          <Route
-            path="/*"
-            element={
-              <ProtectedRoute>
-                <DefaultLayout>
-                  <Routes>
-                    <Route
-                      path="/pages/:userId"
-                      element={
-                          <>
-                            <PageTitle title="Pages" />
-                            <Pages />
-                          </>
-                      }
-                    />
-                    <Route
-                      path="/users"
-                      element={
-                        <>
-                          <PageTitle title="users" />
-                          <Users />
-                        </>
-                      }
-                    />
-                   
-                    <Route
-                      path="/profile"
-                      element={
-                        <>
-                          <PageTitle title="Profile | pagecraft pro" />
-                          <Profile />
-                        </>
-                      }
-                    />
-                   
-                   
-                    <Route
-                      path="/page-builder/:userId/:id"
-                      element={
-                        <ProtectedRoute>
-                          <PageTitle title="Page Builder | PageCraft Pro" />
-                          <PageBuilder />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/subscription"
-                      element={
-                        <ProtectedRoute>
-                          <PageTitle title="Subscription | PageCraft Pro" />
-                          <SubscriptionPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                  </Routes>
-                </DefaultLayout>
-              </ProtectedRoute>
-            }
-          />
+          {PAGE_ROUTES.map((route) => {
+            const RouteComponent = route.component;
+            
+            return (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={
+                  route.isProtected ? (
+                    <ProtectedRoute>
+                      <DefaultLayout>
+                        <PageTitle title={route.title} />
+                        <RouteComponent 
+                          isAdmin={route.isAdmin} 
+                        />
+                      </DefaultLayout>
+                    </ProtectedRoute>
+                  ) : route.isAuthPage ? (
+                    <ProtectedRoute authPage={true}>
+                      <PageTitle title={route.title} />
+                      <RouteComponent 
+                        isAdmin={route.isAdmin} 
+                      />
+                    </ProtectedRoute>
+                  ) : (
+                    <RouteComponent />
+                  )
+                }
+              />
+            );
+          })}
         </Routes>
       )}
       <Toaster />
