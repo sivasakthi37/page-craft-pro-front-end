@@ -20,6 +20,12 @@ export interface RouteConfig {
 // Page Routes
 export const PAGE_ROUTES: RouteConfig[] = [
   {
+    path: '/',
+    component: SignIn,
+    title: 'Sign In | PageCraft Pro',
+    isAuthPage: true,
+  },
+  {
     path: '/signin',
     component: SignIn,
     title: 'Sign In | PageCraft Pro',

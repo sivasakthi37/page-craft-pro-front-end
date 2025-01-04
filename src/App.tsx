@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import { Toaster } from 'react-hot-toast';
 
@@ -29,37 +29,34 @@ const App: React.FC = () => {
         <Loader />
       ) : (
         <Routes>
-          {PAGE_ROUTES.map((route) => {
-            const RouteComponent = route.component;
-            
-            return (
-              <Route
-                key={route.path}
-                path={route.path}
-                element={
-                  route.isProtected ? (
-                    <ProtectedRoute>
-                      <DefaultLayout>
-                        <PageTitle title={route.title} />
-                        <RouteComponent 
-                          isAdmin={route.isAdmin} 
-                        />
-                      </DefaultLayout>
-                    </ProtectedRoute>
-                  ) : route.isAuthPage ? (
-                    <ProtectedRoute authPage={true}>
+          {PAGE_ROUTES.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                route.isProtected ? (
+                  <ProtectedRoute>
+                    <DefaultLayout>
                       <PageTitle title={route.title} />
-                      <RouteComponent 
-                        isAdmin={route.isAdmin} 
-                      />
-                    </ProtectedRoute>
-                  ) : (
-                    <RouteComponent />
-                  )
-                }
-              />
-            );
-          })}
+                      <route.component />
+                    </DefaultLayout>
+                  </ProtectedRoute>
+                ) : route.isAuthPage ? (
+                  <ProtectedRoute authPage={true}>
+                    <PageTitle title={route.title} />
+                    <route.component 
+                      isAdmin={route.isAdmin} 
+                    />
+                  </ProtectedRoute>
+                ) : (
+                  <route.component />
+                )
+              }
+            />
+          ))}
+          
+          {/* Catch-all route to redirect to sign-in */}
+          <Route path="*" element={<Navigate to="/signin" replace />} />
         </Routes>
       )}
       <Toaster />
