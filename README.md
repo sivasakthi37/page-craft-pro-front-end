@@ -131,3 +131,33 @@ Distributed under the MIT License. See `LICENSE` for more information.
 Your Name - sivachandrasekaran37@example.com
 
 Project Link: [https://github.com/your-username/page-craft-pro](https://github.com/your-username/page-craft-pro)
+
+
+## Upcoming Improvements and Roadmap
+
+### Bug Fixes
+1. **Non-Priority Bug Fixes**
+   - Resolve minor UI inconsistencies
+   - Improve error handling across components
+   - Address any reported minor usability issues
+
+### Feature Enhancements
+1. **Text Block Improvements**
+   - Add rich text formatting options:
+     - Italic text support
+     - Bold text formatting
+     - Underline text styling
+     - Text alignment controls
+     - Heading levels (H1, H2, H3)
+
+2. **Planned Features**
+   - Implement more advanced block types
+   - Enhance drag-and-drop functionality
+   - Add more customization options for blocks
+
+### Feature Technical Improvements
+- Continuous performance optimization
+- Enhance type safety
+- Improve code modularity
+- Expand test coverage
+

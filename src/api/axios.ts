@@ -5,7 +5,7 @@ const baseURL = `${import.meta.env.VITE_BASE_URL}/api` || "http://localhost:3000
 
 const axiosInstance: AxiosInstance = axios.create({
     baseURL,
-    timeout: 10000, // 10 seconds timeout
+    timeout: 30000, // 30 seconds timeout
     headers: {
         "Content-Type": "application/json",
     },
