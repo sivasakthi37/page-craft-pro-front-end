@@ -188,6 +188,7 @@ console.log("user.role === 'admin' && authUser?.id && Number(authUser.id) === us
                       }
                     </td>
                     <td className="p-3 text-center">
+                    {(user.role === 'admin' && authUser?.id && authUser.id === user.id) ? null : (
                       <button 
                         onClick={() => handleBanUser(user.id)}
                         className={`${user.status === 'active' ? 'text-green-500' : 'text-red-500'} hover:opacity-75`}
@@ -195,6 +196,7 @@ console.log("user.role === 'admin' && authUser?.id && Number(authUser.id) === us
                       >
                         {user.status === 'active' ?  <FaUnlock /> : <FaBan />}
                       </button>
+                    )}
                     </td>
                     <td className="p-3 text-center">
                       <button 
